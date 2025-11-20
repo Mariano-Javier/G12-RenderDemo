@@ -5,7 +5,8 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 
 import eventosRoutes from "./routes/eventos.js";
-import usuariosRoutes from "./routes/usuarios.js";
+import usuariosRoutes from "./routes/usuarios.js"; // CLIENTES
+import usuariosAdminRoutes from "./routes/usuariosAdmin.js"; // USUARIOS GENERALES (ADMIN)
 import authRoutes from "./routes/auth.js";
 import chatRoutes from "./routes/chat.js";
 
@@ -32,34 +33,49 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(morgan("dev"));
 app.use(cookieParser());
 
-// Ejecuta verificarToken en todas las rutas (para decodificar JWT si existe)
+// Ejecuta verificarToken en todas las rutas (si existe JWT lo decodifica)
 app.use(verificarToken);
 
 // =============================
 // Rutas públicas (sin login)
 // =============================
 app.use("/auth", authRoutes);
-app.use("/chat", chatRoutes);
 
 // =============================
-// Rutas protegidas con JWT + roles
+// Rutas protegidas
 // =============================
 
-// Solo admin o coordinador pueden gestionar clientes (usuarios con rol "cliente")
-app.use("/usuarios", verificarToken, autorizarRoles("admin", "coordinador"), usuariosRoutes);
+// CHAT — requiere login
+app.use("/chat", verificarToken, chatRoutes);
 
-// Admin, coordinador y asistente pueden gestionar eventos
+// CLIENTES (rol cliente) — accesible para ADMIN + COORDINADOR
+app.use(
+  "/usuarios",
+  verificarToken,
+  autorizarRoles("admin", "coordinador"),
+  usuariosRoutes
+);
+
+//  ADMINISTRACIÓN DE USUARIOS — SOLO ADMIN
+app.use(
+  "/usuarios/admin",
+  verificarToken,
+  autorizarRoles("admin"),
+  usuariosAdminRoutes
+);
+
+//  EVENTOS — accesible para ADMIN, COORDINADOR y ASISTENTE
 app.use("/eventos", verificarToken, eventosRoutes);
 
 // =============================
-// Página de inicio (dashboard)
+// Dashboard
 // =============================
 app.get("/", (req, res) => {
   res.render("index");
 });
 
 // =============================
-// Middleware global de errores
+// Manejo global de errores
 // =============================
 app.use((err, req, res, next) => {
   console.error("Error:", err.message);

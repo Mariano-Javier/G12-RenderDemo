@@ -3,7 +3,7 @@ html
   head
     meta(charset="utf-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Eventify Manager
+    title Axora - Manager
 
     // ===== Bootstrap CSS =====
     link(
@@ -37,8 +37,15 @@ html
           ul.navbar-nav.ms-auto.align-items-center
             if user
 
-              // ===== Clientes =====
-              if ["admin", "coordinador", "asistente"].includes(user.rol)
+              // ===== Usuarios (solo admin) =====
+              if user.rol === "admin"
+                li.nav-item
+                  a.nav-link(href="/usuarios/admin")
+                    i.bi.bi-people.me-1
+                    | Usuarios
+
+              // ===== Clientes (admin y coordinador) =====
+              if ["admin", "coordinador"].includes(user.rol)
                 li.nav-item
                   a.nav-link(href="/usuarios/clientes")
                     i.bi.bi-people-fill.me-1
@@ -49,6 +56,13 @@ html
                 a.nav-link(href="/eventos")
                   i.bi.bi-calendar-check.me-1
                   | Eventos
+
+              // ===== Crear evento (solo admin/coordinador) =====
+              if ["admin","coordinador"].includes(user.rol)
+                li.nav-item
+                  a.nav-link(href="/eventos/crear")
+                    i.bi.bi-plus-circle-fill.me-1
+                    | Crear evento
 
               // ===== Registrar usuario (admin y coordinador) =====
               if user.rol == 'admin' || user.rol == 'coordinador'

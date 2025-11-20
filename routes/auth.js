@@ -1,6 +1,6 @@
 import express from "express";
-import { login, logout, registrar } from "../controllers/authController.js";
 import { verificarToken } from "../middlewares/authMiddleware.js";
+import { login, logout, registrar, loginAPI } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -12,12 +12,15 @@ router.get("/login", (req, res) => {
 // Procesar login
 router.post("/login", login);
 
+// LOGIN ESPECIAL PARA API / Thunder Client
+router.post("/api/login", loginAPI);
+
 // Cerrar sesión
 router.get("/logout", logout);
 
 // Mostrar formulario de registro (solo admin y coordinador verá select filtrado, pero la ruta sigue protegida)
 router.get("/register", verificarToken, (req, res) => {
-  // El view register.pug manejará el filtro de roles según res.locals.user
+// El view register.pug manejará el filtro de roles según res.locals.user
   res.render("register");
 });
 
